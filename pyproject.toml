@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "panorama-t1"
+version = "1.0.0"
+description = "Pipeline didático de panoramas - MC919 T1"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24,<3", "opencv-python>=4.8,<5", "scipy>=1.11,<2"]
+
+[project.optional-dependencies]
+test = ["pytest>=7,<10"]
+
+[project.scripts]
+panorama = "panorama.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["panorama*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
