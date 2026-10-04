@@ -1,0 +1,538 @@
+\documentclass[11pt,a4paper]{article}
+
+% ---------------------------------------------------------------------------
+% Pacotes
+% ---------------------------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+% Com o babel em português (ex.: Overleaf), a hifenização fica correta.
+% Sem ele, a hifenização é desligada para evitar quebras com padrões do inglês.
+\IfFileExists{portuges.ldf}{\usepackage[brazil]{babel}}{%
+  \hyphenpenalty=10000 \exhyphenpenalty=10000
+  \renewcommand{\figurename}{Figura}
+  \renewcommand{\tablename}{Tabela}
+  \renewcommand{\refname}{Referências}}
+\usepackage{mathptmx}
+\renewcommand{\ttdefault}{lmtt}
+\usepackage[a4paper,top=1.8cm,bottom=1.8cm,left=1.8cm,right=1.8cm]{geometry}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage[table]{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\usepackage{array,tabularx}
+\usepackage{caption,subcaption}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+\emergencystretch=2em
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+
+% ---------------------------------------------------------------------------
+% Estilo (modelo dos relatórios anteriores)
+% ---------------------------------------------------------------------------
+\definecolor{cabecalho}{RGB}{214,230,240}
+\definecolor{azul}{RGB}{52,92,128}
+\definecolor{pendente}{RGB}{200,0,0}
+
+\titleformat{\section}{\Large\bfseries}{\thesection.}{0.35em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection.}{0.35em}{}
+\titlespacing*{\section}{0pt}{8pt plus 2pt minus 2pt}{3pt}
+\titlespacing*{\subsection}{0pt}{5pt plus 2pt minus 1pt}{2pt}
+
+\captionsetup{font={small,it},labelsep=endash,justification=centering,skip=4pt}
+\captionsetup[sub]{font={footnotesize,it},skip=2pt}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+
+\setlist{nosep,leftmargin=1.2em}
+\arrayrulecolor{gray!60}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\renewcommand{\arraystretch}{1.15}
+
+% ---------------------------------------------------------------------------
+% Campos a preencher depois da coleta
+% ---------------------------------------------------------------------------
+% Texto que depende das fotos e dos resultados (busque por "\preencher").
+\newcommand{\preencher}[1]{\textcolor{pendente}{[\textit{Preencher: #1}]}}
+% Valor numérico de tabela (busque por "\vazio").
+\newcommand{\vazio}{\textcolor{pendente}{?}}
+
+% \imagem{nome}{largura}{altura}{conteúdo esperado}
+% Usa figuras/<nome>.png, .jpg ou .pdf se existir; caso contrário, desenha um
+% espaço reservado do mesmo tamanho, para que a paginação não mude.
+\newcommand{\imagem}[4]{%
+  \IfFileExists{figuras/#1.png}{\includegraphics[width=#2,height=#3,keepaspectratio]{figuras/#1.png}}{%
+  \IfFileExists{figuras/#1.jpg}{\includegraphics[width=#2,height=#3,keepaspectratio]{figuras/#1.jpg}}{%
+  \IfFileExists{figuras/#1.pdf}{\includegraphics[width=#2,height=#3,keepaspectratio]{figuras/#1.pdf}}{%
+  \tikz\node[draw=gray,dashed,minimum width=#2-0.4pt,minimum height=#3-0.4pt,
+             text width=#2-10pt,align=center,inner sep=0pt,font=\scriptsize,text=gray]
+            {\textbf{Inserir imagem:} \texttt{figuras/#1}\\#4};}}}}
+
+% Ordem inferida (Figura 5b): índices das imagens como aparecem na matriz de
+% conectividade (metrics.json -> order e rejected).
+\newcommand{\ordemInferida}{?,?,?,?,?,?}
+\newcommand{\imagemIntrusa}{?}
+\newcounter{nimagens}
+
+\begin{document}
+
+% ---------------------------------------------------------------------------
+% Cabeçalho
+% ---------------------------------------------------------------------------
+\begin{center}
+  {\LARGE\bfseries Relatório Técnico T1: Visão Computacional\par}
+  \vspace{4pt}
+  {\Large\bfseries Panoramas Automáticos a partir de Imagens Fora de Ordem\par}
+  \vspace{4pt}
+  {\large MC919 -- Prof. Anderson Rocha -- 2º semestre de 2026\par}
+  \vspace{6pt}
+  Bruno Medeiros Saback - 281746\\
+  Victor Luigi Roquetto - 250955\\
+  Lucas Souza Guimarães - 195948\\
+  Lucas Valadares Lima - 247025\\
+  Outubro de 2026
+\end{center}
+
+\vspace{-2pt}
+\begin{center}\textbf{\large Resumo}\end{center}
+\vspace{-6pt}
+Este relatório apresenta um pipeline em Python e OpenCV que constrói panoramas de forma automática a
+partir de uma pasta de imagens com nomes embaralhados, sem uso de metadados EXIF. O sistema extrai
+características com SIFT (comparado ao ORB), emparelha descritores com Brute Force e o ratio test de Lowe
+e estima, por RANSAC, a homografia de todos os pares de imagens. A matriz de inliers define um grafo de
+vizinhança que isola a cena, rejeita imagens intrusas e recupera a sequência espacial. As imagens são
+alinhadas pelo encadeamento de homografias sobre uma árvore geradora de máxima confiança e compostas com
+feathering ou blending multibanda, com remoção de fantasmas por detecção de pixels inconsistentes. Como
+extras, foram implementados ajuste global, projeções cilíndrica e esférica com suporte a 360°,
+compensação de exposição e comparação com o \texttt{cv2.Stitcher}. \preencher{síntese dos resultados:
+imagens aceitas, intrusa rejeitada, erro de reprojeção médio e efeito do deghosting.}
+
+% ---------------------------------------------------------------------------
+\section{Introdução e Visão Geral do Pipeline}
+% ---------------------------------------------------------------------------
+O objetivo do trabalho é construir panoramas a partir de imagens parcialmente sobrepostas, recebidas fora
+de ordem e misturadas a uma imagem de outra cena, sem intervenção manual. O pipeline segue a abordagem
+clássica de costura baseada em características \cite{brown2007,szeliski2022} e foi implementado em
+Python, com OpenCV, NumPy e SciPy (Figura~\ref{fig:pipeline}). O comando \texttt{python -m panorama build
+<pasta>} produz o panorama, as figuras intermediárias de cada etapa e um arquivo \texttt{metrics.json} com
+a configuração, a ordem inferida e as métricas; o comando \texttt{compare} executa as variantes da
+Seção~\ref{sec:extras}.
+
+O modelo geométrico é a homografia, válida para cenas aproximadamente planas ou para uma câmera que apenas
+gira em torno do seu centro óptico. A leitura ignora o EXIF, inclusive a orientação, e os nomes dos
+arquivos servem apenas como rótulos. Cada imagem é reduzida para que o maior lado tenha até 1200~px,
+escala à qual se referem todos os limiares e erros em pixels deste relatório; a semente aleatória é
+fixada (42) para que as execuções sejam reprodutíveis.
+
+\begin{figure}[!htb]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+    etapa/.style={draw=azul,fill=cabecalho,rounded corners=2pt,align=center,font=\footnotesize,
+                  minimum height=1.05cm,text width=1.85cm,inner sep=2pt},
+    rotulo/.style={font=\scriptsize\itshape,text=gray,below=1pt},
+    seta/.style={-{Stealth[length=4pt]},thick,azul}]
+  \node[etapa] (a) {Leitura\\sem EXIF};
+  \node[etapa,right=0.35cm of a] (b) {Detecção\\SIFT / ORB};
+  \node[etapa,right=0.35cm of b] (c) {BF + ratio\\de Lowe};
+  \node[etapa,right=0.35cm of c] (d) {RANSAC em\\todos os pares};
+  \node[etapa,right=0.35cm of d] (e) {Matriz de\\conectividade};
+  \node[etapa,right=0.35cm of e] (f) {Intrusa e\\ordem espacial};
+  \node[etapa,right=0.35cm of f] (g) {Alinhamento\\e warp};
+  \node[etapa,right=0.35cm of g] (h) {Blending e\\deghosting};
+  \foreach \u/\v in {a/b,b/c,c/d,d/e,e/f,f/g,g/h} \draw[seta] (\u) -- (\v);
+  \node[rotulo] at (a.south) {entrada};
+  \node[rotulo] at (b.south) {Etapa 2};
+  \node[rotulo] at (c.south) {Etapa 3};
+  \node[rotulo] at (d.south) {Etapas 4 e 5};
+  \node[rotulo] at (e.south) {Etapa 4};
+  \node[rotulo] at (f.south) {Etapa 4};
+  \node[rotulo] at (g.south) {Etapa 5};
+  \node[rotulo] at (h.south) {Etapa 6};
+  \node[draw=azul,dashed,rounded corners=2pt,font=\footnotesize,align=center,inner sep=3pt]
+       (x) at ($(d.south)!0.5!(h.south)+(0,-0.95)$)
+       {Opcionais: ajuste global (X1), cilindro/esfera e 360° (X2), exposição (X3), \texttt{cv2.Stitcher} (X4)};
+\end{tikzpicture}}
+\caption{Visão geral do pipeline e correspondência com as etapas do enunciado.}
+\label{fig:pipeline}
+\end{figure}
+
+% ---------------------------------------------------------------------------
+\section{Coleta das Imagens}
+% ---------------------------------------------------------------------------
+A pasta de entrada (Figura~\ref{fig:entradas}) reúne as imagens parcialmente sobrepostas da cena, com
+nomes embaralhados, e uma imagem intrusa de outra cena.
+\textbf{Local e data:} \preencher{local, interno ou externo, e data da captura.}
+\textbf{Dispositivo:} \preencher{câmera ou celular e resolução original.}
+\textbf{Conjunto:} \preencher{número de imagens, sobreposição aproximada e origem da intrusa.}
+\textbf{Elemento móvel:} \preencher{objeto e imagens em que aparece.}
+\textbf{Observações:} \preencher{iluminação, movimento da câmera e dificuldades da coleta.}
+
+\begin{figure}[!htb]
+\centering
+\imagem{entradas}{\linewidth}{2.6cm}{Miniaturas das imagens de entrada, na ordem de leitura, com os
+índices usados na matriz de conectividade (\texttt{metrics.json} $\rightarrow$ \texttt{images})}
+\caption{Imagens de entrada na ordem de leitura, sem relação com a ordem de captura, incluindo a intrusa.}
+\label{fig:entradas}
+\end{figure}
+
+% ---------------------------------------------------------------------------
+\section{Detecção e Extração de Características}
+% ---------------------------------------------------------------------------
+Foram implementados três detectores do OpenCV, selecionáveis por parâmetro: SIFT \cite{lowe2004}, com
+descritor de 128 dimensões em ponto flutuante e invariância a escala e rotação; ORB \cite{rublee2011}, com
+detector FAST orientado e descritor binário; e AKAZE \cite{alcantarilla2013}, com espaço de escalas não
+linear e descritor binário. Em cada execução, o detector principal e os de comparação (por padrão, SIFT e
+ORB, com até 5000 pontos por imagem) processam as mesmas imagens com o mesmo emparelhamento, e registram-se
+o número de keypoints, o tempo de extração e os pares aceitos no grafo (Tabela~\ref{tab:detectores}). Os
+keypoints são desenhados com um círculo proporcional à escala e um raio que indica a orientação
+(Figura~\ref{fig:keypoints}).
+
+O SIFT foi adotado como padrão: seus descritores em ponto flutuante são mais discriminativos que os
+binários, o que favorece o ratio test e o consenso do RANSAC sob variações de escala e de ponto de vista,
+ao custo de um tempo de extração maior, aceitável no processamento offline de poucas imagens.
+\preencher{confirmar a escolha com a Tabela~\ref{tab:detectores} e a Figura~\ref{fig:keypoints}.}
+
+\begin{table}[!htb]
+\centering\small
+\begin{tabularx}{\linewidth}{|C|C|C|C|}
+\hline
+\rowcolor{cabecalho}\textbf{Detector} & \textbf{Keypoints por imagem (média)} &
+\textbf{Tempo total de extração (s)} & \textbf{Pares aceitos no grafo} \\ \hline
+SIFT & \vazio & \vazio & \vazio \\ \hline
+ORB  & \vazio & \vazio & \vazio \\ \hline
+\end{tabularx}
+\caption{Comparação dos detectores sobre o mesmo conjunto de imagens e com os mesmos limiares.}
+\label{tab:detectores}
+\end{table}
+
+\begin{figure}[!htb]
+\centering
+\begin{subfigure}[t]{0.49\linewidth}\centering
+  \imagem{keypoints-sift}{\linewidth}{3.4cm}{\texttt{keypoints/sift/<i>.jpg}}
+  \caption{SIFT}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\linewidth}\centering
+  \imagem{keypoints-orb}{\linewidth}{3.4cm}{\texttt{keypoints/orb/<i>.jpg} (mesma imagem)}
+  \caption{ORB}
+\end{subfigure}
+\caption{Keypoints sobre a mesma imagem: o círculo indica a escala e o raio, a orientação.}
+\label{fig:keypoints}
+\end{figure}
+
+% ---------------------------------------------------------------------------
+\section{Emparelhamento de Características}
+% ---------------------------------------------------------------------------
+Os descritores são emparelhados com o Brute Force Matcher do OpenCV, com distância L2 para o SIFT e de
+Hamming para os descritores binários. Para cada descritor da imagem $i$, buscam-se os dois vizinhos mais
+próximos na imagem $j$, com distâncias $d_1 \le d_2$, e o par é mantido se $d_1 < 0{,}75\,d_2$ (ratio test
+de Lowe \cite{lowe2004}). Em seguida, impõe-se a unicidade do destino: se vários pontos de $i$ apontam
+para o mesmo ponto de $j$, mantém-se apenas o de menor distância. A Figura~\ref{fig:matches} mostra um
+mesmo par de imagens antes do ratio test, depois dele e após o RANSAC.
+
+Os principais desafios são as correspondências erradas em texturas repetitivas ou regiões pouco
+texturizadas e os pontos sobre o elemento móvel, cuja posição muda entre as vistas. Eles são tratados pelo
+RANSAC, que descarta pares incompatíveis com a homografia dominante (a do fundo estático), pela verificação
+inversa de cada inlier (Seção~\ref{sec:homografia}) e pela exigência de cobertura espacial mínima dos
+inliers (Seção~\ref{sec:ordem}), que impede que um consenso restrito a um objeto pequeno ou a uma linha
+seja tomado como sobreposição. \preencher{desafios observados no conjunto coletado.}
+
+\begin{figure}[!htb]
+\centering
+\begin{subfigure}[t]{0.325\linewidth}\centering
+  \imagem{matches-antes}{\linewidth}{2.3cm}{\texttt{matches/<i>\_<j>\_before.jpg}}
+  \caption{Antes do ratio test}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.325\linewidth}\centering
+  \imagem{matches-ratio}{\linewidth}{2.3cm}{\texttt{matches/<i>\_<j>\_ratio.jpg}}
+  \caption{Após ratio test e unicidade}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.325\linewidth}\centering
+  \imagem{matches-inliers}{\linewidth}{2.3cm}{\texttt{matches/<i>\_<j>\_inliers.jpg}}
+  \caption{Inliers do RANSAC}
+\end{subfigure}
+\caption{Correspondências entre o mesmo par de imagens antes e depois da filtragem. Por clareza, no máximo
+120 linhas são desenhadas; as métricas usam todos os pares.}
+\label{fig:matches}
+\end{figure}
+
+% ---------------------------------------------------------------------------
+\section{Ordenação Automática das Imagens}
+\label{sec:ordem}
+% ---------------------------------------------------------------------------
+A ordem nunca é obtida de nomes, datas ou EXIF: os arquivos são lidos em ordem alfabética apenas para
+receberem um índice, e a sequência é recuperada exclusivamente da geometria entre as imagens.
+
+\subsection{Matriz de conectividade}
+Todos os $n(n-1)/2$ pares são avaliados, e o número de inliers do RANSAC de cada par preenche a matriz de
+conectividade (Figura~\ref{fig:grafo}a). Um par se torna aresta do grafo de vizinhança quando tem (i) ao
+menos 20 inliers, (ii) taxa de inliers (inliers sobre matches após o ratio test) de ao menos 0,3 e (iii)
+fecho convexo dos inliers cobrindo ao menos 1\% da área de cada imagem. A matriz registra as contagens de
+todos os pares, mas somente os pares aceitos entram no grafo.
+
+\subsection{Rejeição da imagem intrusa}
+A maior componente conexa do grafo é considerada a cena, e as imagens das demais componentes são
+rejeitadas: uma imagem de outra cena não forma arestas válidas e fica isolada (Figura~\ref{fig:grafo}b).
+Se duas componentes empatam em tamanho, a execução é interrompida com uma mensagem explícita, em vez de
+escolher uma cena arbitrariamente. \preencher{intrusa rejeitada e seu maior número de inliers com a cena.}
+
+\subsection{Sequência a partir do grafo de vizinhança}
+A imagem com maior soma de inliers nas arestas incidentes é escolhida como âncora, o referencial do
+mosaico. A partir dela constrói-se a árvore geradora de peso máximo (algoritmo de Prim, com peso igual ao
+número de inliers), que liga todas as imagens pelos pares mais confiáveis. Pelo encadeamento das
+homografias da árvore (Seção~\ref{sec:homografia}), os centros das imagens são levados ao referencial da
+âncora e ordenados ao longo do eixo principal (PCA) da sua distribuição; nas projeções curvas, usa-se o
+azimute do eixo óptico de cada câmera, abrindo o ciclo no maior intervalo angular. Sem informação
+temporal, a ordem e a sua reversa são equivalentes. \preencher{ordem inferida (nomes dos arquivos) e
+conferência visual com a cena.}
+
+\begin{figure}[!htb]
+\centering
+\begin{subfigure}[b]{0.42\linewidth}\centering
+  \imagem{conectividade}{\linewidth}{4.2cm}{\texttt{connectivity.png}}
+  \caption{Matriz de conectividade (inliers por par)}
+\end{subfigure}\hfill
+\begin{subfigure}[b]{0.54\linewidth}\centering
+  \setcounter{nimagens}{0}%
+  \adjustbox{max width=\linewidth}{%
+  \begin{tikzpicture}[no/.style={circle,draw=azul,fill=cabecalho,thick,minimum size=0.75cm,
+                                 inner sep=0pt,font=\small}]
+    \foreach \v [count=\k] in \ordemInferida {
+      \stepcounter{nimagens}
+      \pgfmathsetmacro{\yy}{-0.75*mod(\k+1,2)}
+      \node[no] (n\k) at (1.2*\k,\yy) {\v};
+    }
+    \pgfmathtruncatemacro{\total}{\value{nimagens}}
+    \foreach \k in {2,...,\total} {
+      \pgfmathtruncatemacro{\ant}{\k-1}
+      \draw[thick,azul] (n\ant) -- (n\k);
+    }
+    \pgfmathtruncatemacro{\meio}{ceil(\total/2)}
+    \pgfmathsetmacro{\xm}{0.6*(\total+1)}
+    \node[font=\footnotesize,text=gray] at (\xm,0.75) {ordem inferida sem uso de EXIF};
+    \node[no,dashed,fill=white,draw=gray] (x) at ($(n\meio)+(0,-1.7)$) {\imagemIntrusa};
+    \draw[dashed,gray] (n\meio) -- node[fill=white,inner sep=1pt,text=pendente] {$\times$} (x);
+    \node[right=4pt of x,font=\footnotesize,text=gray] {imagem intrusa rejeitada};
+  \end{tikzpicture}}
+  \caption{Grafo de vizinhança: ordem inferida e intrusa}
+\end{subfigure}
+\caption{A matriz de inliers define o grafo de vizinhança, do qual se obtém a ordem das imagens; a intrusa,
+sem arestas válidas, é descartada. Os números são os índices de leitura das imagens.}
+\label{fig:grafo}
+\end{figure}
+
+% ---------------------------------------------------------------------------
+\section{Estimação de Homografia e Alinhamento}
+\label{sec:homografia}
+% ---------------------------------------------------------------------------
+A homografia $H_{ij}$, que leva pixels da imagem $i$ para a imagem $j$, é estimada com
+\texttt{cv2.findHomography} por RANSAC \cite{fischler1981}, com limiar de 3~px, confiança de 0,999 e até
+5000 iterações. Cada inlier também precisa satisfazer a homografia inversa, com erro de até 6~px. Para cada
+par utilizado são reportados a taxa de inliers, o erro de reprojeção médio $\bar{e}$ e o RMSE simétrico
+sobre os $N$ inliers $(\mathbf{a}_k,\mathbf{b}_k)$, em que $\pi(\cdot)$ é a desomogeneização:
+\begin{equation}
+  \bar{e} = \frac{1}{N}\sum_{k=1}^{N}\big\|\pi(H_{ij}\mathbf{a}_k)-\mathbf{b}_k\big\|, \qquad
+  \mathrm{RMSE} = \sqrt{\frac{1}{N}\sum_{k=1}^{N}
+  \frac{\|\pi(H_{ij}\mathbf{a}_k)-\mathbf{b}_k\|^2 + \|\pi(H_{ij}^{-1}\mathbf{b}_k)-\mathbf{a}_k\|^2}{2}} .
+\end{equation}
+
+O alinhamento encadeia as homografias da árvore geradora: sendo $T_i$ a transformação da imagem $i$ para o
+referencial da âncora ($T_{\text{âncora}} = I$), cada imagem $j$ ligada na árvore a uma imagem $i$ já
+alinhada recebe
+\begin{equation}
+  T_j = T_i \, H_{ij}^{-1} .
+\end{equation}
+As imagens são projetadas com \texttt{cv2.warpPerspective} em um canvas que contém os cantos
+transformados de todas elas, com máscaras de validade que distinguem pixels pretos da cena de regiões sem
+dados. Se alguma imagem cruza o infinito ou o canvas excede 12 megapixels, a execução é interrompida com
+uma mensagem que sugere a projeção cilíndrica. A Tabela~\ref{tab:pares} traz as métricas dos pares da árvore e a
+Figura~\ref{fig:progressivo}, o alinhamento progressivo. \preencher{comentário sobre as taxas de inliers e
+os erros da Tabela~\ref{tab:pares}.}
+
+\begin{table}[!htb]
+\centering\small
+\begin{tabularx}{\linewidth}{|C|C|C|C|C|C|}
+\hline
+\rowcolor{cabecalho}\textbf{Par ($i$--$j$)} & \textbf{Matches após o ratio test} & \textbf{Inliers} &
+\textbf{Taxa de inliers (\%)} & \textbf{Erro médio (px)} & \textbf{RMSE simétrico (px)} \\ \hline
+\vazio--\vazio & \vazio & \vazio & \vazio & \vazio & \vazio \\ \hline
+\vazio--\vazio & \vazio & \vazio & \vazio & \vazio & \vazio \\ \hline
+\vazio--\vazio & \vazio & \vazio & \vazio & \vazio & \vazio \\ \hline
+\vazio--\vazio & \vazio & \vazio & \vazio & \vazio & \vazio \\ \hline
+\vazio--\vazio & \vazio & \vazio & \vazio & \vazio & \vazio \\ \hline
+\end{tabularx}
+\caption{Métricas dos pares de imagens usados no alinhamento (arestas da árvore geradora).}
+\label{tab:pares}
+\end{table}
+
+\begin{figure}[!htb]
+\centering
+\begin{subfigure}[t]{0.325\linewidth}\centering
+  \imagem{progressivo-1}{\linewidth}{2.3cm}{\texttt{progressive/002.jpg}}
+  \caption{Duas imagens}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.325\linewidth}\centering
+  \imagem{progressivo-2}{\linewidth}{2.3cm}{\texttt{progressive/<etapa>.jpg}}
+  \caption{Etapa intermediária}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.325\linewidth}\centering
+  \imagem{progressivo-3}{\linewidth}{2.3cm}{\texttt{progressive/<última>.jpg}}
+  \caption{Todas as imagens}
+\end{subfigure}
+\caption{Alinhamento progressivo: cada imagem é acrescentada ao mosaico seguindo a ordem inferida.}
+\label{fig:progressivo}
+\end{figure}
+
+% ---------------------------------------------------------------------------
+\section{Composição, Blending e Remoção de Fantasmas}
+% ---------------------------------------------------------------------------
+\subsection{Composição e blending}
+A composição é incremental e segue a ordem inferida: cada imagem projetada $B$ é combinada ao mosaico
+acumulado $A$. No feathering, o peso de cada fonte depende da distância do pixel à borda da sua região
+válida ($d_A$ e $d_B$), calculada por transformada de distância:
+\begin{equation}
+  I = \alpha A + (1-\alpha) B, \qquad \alpha = \frac{d_A}{d_A + d_B} .
+\end{equation}
+Como alternativa, o blending multibanda \cite{burt1983} decompõe as imagens em pirâmides laplacianas de
+até 5 níveis e mistura cada nível com a versão gaussiana correspondente de $\alpha$: as baixas
+frequências são misturadas em faixas largas, suavizando diferenças de iluminação, e as altas frequências
+em faixas estreitas, preservando os detalhes.
+
+\subsection{Remoção de fantasmas}
+Um objeto que se move entre as capturas aparece em posições distintas nas duas fontes, e a média ponderada
+gera cópias translúcidas (fantasmas). O pipeline detecta pixels inconsistentes na sobreposição: (i)
+calcula a diferença absoluta média entre os canais BGR das duas fontes; (ii) marca os pixels com diferença
+acima de 30 (escala 0--255); (iii) dilata a máscara em 5~px, para incluir as bordas do objeto, e a separa
+em componentes conexas, descartando as menores que 25~px; e (iv) atribui a cada componente uma única
+fonte, a de maior distância média à própria borda, isto é, a mais interna à sua imagem. Nessas regiões a
+fonte escolhida é copiada diretamente, inclusive no multibanda, para que as baixas frequências não
+reintroduzam a mistura. Na mesma execução são gerados os mosaicos com e sem
+deghosting, com o mesmo canvas e blending; o recorte de 320$\times$240~px da Figura~\ref{fig:panorama}b é
+centrado na região com mais pixels alterados e ampliado em 2$\times$. \preencher{efeito do deghosting
+sobre o elemento móvel no recorte.}
+
+\subsection{Avaliação do resultado}
+A qualidade do panorama (Figura~\ref{fig:panorama}a) é avaliada visualmente, pela continuidade de linhas
+retas nas emendas e pela ausência de distorções e de objetos duplicados ou cortados, e por métricas
+registradas pelo pipeline: erro de reprojeção por par após o alinhamento final, diferença média de cor na
+sobreposição a cada imagem acrescentada, fração do canvas coberta por dados e número de pixels alterados
+pelo deghosting. \preencher{avaliação visual e valores dessas métricas.}
+
+\begin{figure}[!htb]
+\centering
+\begin{subfigure}[t]{\linewidth}\centering
+  \imagem{panorama}{\linewidth}{3.7cm}{\texttt{panorama.png}}
+  \caption{Panorama final gerado automaticamente a partir da pasta fora de ordem}
+\end{subfigure}\\[4pt]
+\begin{subfigure}[t]{0.57\linewidth}\centering
+  \imagem{deghost}{\linewidth}{3.5cm}{\texttt{deghost\_comparison.png}}
+  \caption{Mesma região ampliada em 2$\times$, sem (esquerda) e com (direita) remoção de fantasmas}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.41\linewidth}\centering
+  \imagem{stitcher}{\linewidth}{3.5cm}{\texttt{reference/panorama.png}}
+  \caption{Referência \texttt{cv2.Stitcher} com as imagens aceitas}
+\end{subfigure}
+\caption{Resultado da composição, efeito da remoção de fantasmas e referência pronta do OpenCV.}
+\label{fig:panorama}
+\end{figure}
+
+% ---------------------------------------------------------------------------
+\section{Extras}
+\label{sec:extras}
+% ---------------------------------------------------------------------------
+\subsection{Ajuste global dos parâmetros (X1)}
+O encadeamento par a par acumula erros e ignora as arestas fora da árvore; o ajuste global refina em
+conjunto as transformações de todas as imagens (âncora fixa) usando todos os pares aceitos. No
+plano, cada imagem tem 8 parâmetros de homografia e $H_{ij} = T_j^{-1}T_i$; nas projeções curvas,
+adota-se o modelo de rotação pura \cite{brown2007}, com 3 parâmetros de rotação por câmera, um fator
+focal comum e $H_{ij} = K_j R_j^{\top} R_i K_i^{-1}$. A função minimizada com
+\texttt{scipy.optimize.least\_squares} é a soma dos resíduos de reprojeção direta e inversa de até 250
+inliers por par, com perda robusta soft-L1 na escala do limiar do RANSAC; a solução só é aceita se não
+aumentar o erro. Antes do ajuste, atalhos (arestas fora da árvore) com erro mediano acima de
+$\max(15~\text{px};\,8\%\text{ da largura})$ sob as transformações iniciais são descartados, evitando
+laços falsos causados por texturas repetitivas.
+
+\subsection{Projeções cilíndrica e esférica e panorama de 360° (X2)}
+Para varreduras amplas, cada câmera é descrita por uma rotação $R_i$, obtida por SVD como a rotação mais
+próxima de $K_j^{-1}H_{ij}K_i$, e por intrínsecos $K$ com ponto principal no centro e foco proporcional à
+largura (fator 0,9 por padrão, sem EXIF). Um raio $(x,y,z)$ é mapeado para
+$\theta = \operatorname{atan2}(x,z)$ e $v = y/\sqrt{x^2+z^2}$ no cilindro, ou
+$\phi = \operatorname{atan2}(y,\sqrt{x^2+z^2})$ na esfera, e o warp usa mapeamento inverso com
+\texttt{cv2.remap}. No modo 360°, o canvas cobre exatamente $2\pi$ de longitude, tratada de forma
+periódica no blending, e exige-se uma aresta entre a primeira e a última imagem da ordem.
+
+\subsection{Compensação de exposição (X3)}
+Ganhos escalares $g_i$ são estimados pela luminância suavizada nos inliers de cada par, sem pixels escuros
+ou saturados: com a mediana de $\log(I_j/I_i)$ em cada aresta, resolve-se por mínimos quadrados
+$\log g_i - \log g_j = \log(I_j/I_i)$, com o ganho da âncora fixo em 1 e os demais limitados a
+$[0{,}4;\,2{,}5]$. Os ganhos são aplicados antes do deghosting, para que diferenças de exposição não sejam
+tomadas como movimento.
+
+\subsection{Comparação com o \texttt{cv2.Stitcher} (X4)}
+O \texttt{cv2.Stitcher}, em modo panorama, recebe as mesmas imagens redimensionadas em duas condições:
+apenas as imagens aceitas e todas as entradas, incluindo a intrusa; eventuais falhas são registradas com o
+código de status (Figura~\ref{fig:panorama}c). O comando \texttt{compare} executa oito variantes do
+pipeline a partir de uma mesma base, variando apenas projeção, alinhamento, exposição ou blending e
+mantendo os demais parâmetros fixos (Tabela~\ref{tab:variantes}).
+\preencher{análise das variantes e da comparação com o \texttt{cv2.Stitcher}.}
+
+\begin{table}[!htb]
+\centering\small
+\begin{tabularx}{\linewidth}{|>{\raggedright\arraybackslash}p{6.4cm}|>{\centering\arraybackslash}p{3.4cm}|C|}
+\hline
+\rowcolor{cabecalho}\textbf{Variante} & \textbf{Erro médio dos pares (px)} & \textbf{Observações} \\ \hline
+Base: plano, par a par, feathering        & \vazio & \vazio \\ \hline
+Plano + ajuste global (X1)                & \vazio & \vazio \\ \hline
+Plano + exposição (X3) / + multibanda     & \vazio\ / \vazio & \vazio \\ \hline
+Cilindro (X2): par a par / ajuste global  & \vazio\ / \vazio & \vazio \\ \hline
+Esfera: par a par / ajuste global         & \vazio\ / \vazio & \vazio \\ \hline
+\texttt{cv2.Stitcher} (X4): aceitas / todas       & --     & \vazio \\ \hline
+\end{tabularx}
+\caption{Variantes executadas pelo comando \texttt{compare} (erro de reprojeção médio após o alinhamento
+final) e resultado do \texttt{cv2.Stitcher}.}
+\label{tab:variantes}
+\end{table}
+
+% ---------------------------------------------------------------------------
+\section{Discussão e Conclusão}
+% ---------------------------------------------------------------------------
+O pipeline executa todo o fluxo sem intervenção manual, da pasta fora de ordem ao panorama com remoção de
+fantasmas. Cada execução registra configuração, versões e métricas sem sobrescrever resultados
+anteriores, e testes automatizados com cenas sintéticas e gabarito verificam, entre outros pontos, a
+rejeição da intrusa, a independência entre nomes de arquivo e ordem, o deghosting sem transparência e o
+fechamento de panoramas de 360°.
+
+As principais limitações decorrem das hipóteses do modelo: (i) a homografia pressupõe cena plana ou
+rotação pura, sem correção de paralaxe, distorção de lente ou rolling shutter; (ii) a ordenação supõe uma
+varredura em faixa única, e a rejeição da intrusa supõe que a cena seja a maior componente do grafo; (iii)
+o deghosting evita misturar fontes, mas não identifica semanticamente o fundo e pode manter o objeto em
+uma das posições; e (iv) a exposição é corrigida por um ganho escalar, sem ajuste de balanço de branco ou
+vinheta. \preencher{conclusão com os principais resultados: qualidade do panorama, efeito do deghosting e
+comparação com o \texttt{cv2.Stitcher}.}
+
+\begin{thebibliography}{9}
+\footnotesize
+\setlength{\itemsep}{0pt}
+\bibitem{lowe2004} D. G. Lowe. Distinctive image features from scale-invariant keypoints.
+\textit{International Journal of Computer Vision}, 60(2):91--110, 2004.
+\bibitem{rublee2011} E. Rublee, V. Rabaud, K. Konolige e G. Bradski. ORB: an efficient alternative to
+SIFT or SURF. \textit{IEEE International Conference on Computer Vision (ICCV)}, p. 2564--2571, 2011.
+\bibitem{alcantarilla2013} P. F. Alcantarilla, J. Nuevo e A. Bartoli. Fast explicit diffusion for
+accelerated features in nonlinear scale spaces. \textit{British Machine Vision Conference (BMVC)}, 2013.
+\bibitem{fischler1981} M. A. Fischler e R. C. Bolles. Random sample consensus: a paradigm for model
+fitting with applications to image analysis and automated cartography. \textit{Communications of the
+ACM}, 24(6):381--395, 1981.
+\bibitem{brown2007} M. Brown e D. G. Lowe. Automatic panoramic image stitching using invariant features.
+\textit{International Journal of Computer Vision}, 74(1):59--73, 2007.
+\bibitem{burt1983} P. J. Burt e E. H. Adelson. A multiresolution spline with application to image
+mosaics. \textit{ACM Transactions on Graphics}, 2(4):217--236, 1983.
+\bibitem{szeliski2022} R. Szeliski. \textit{Computer Vision: Algorithms and Applications}. 2ª ed.,
+Springer, 2022.
+\end{thebibliography}
+
+\end{document}
