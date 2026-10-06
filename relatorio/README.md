@@ -1,54 +1,38 @@
-# Relatório do T1 (LaTeX)
+# Relatório do T1
 
-Fonte do relatório técnico (E1): capa, seis páginas de corpo e o Anexo A com as fotos.
-A capa e o anexo não contam no limite de páginas.
+O projeto mantém duas versões da mesma fonte:
+
+- `relatorio_entrega.tex`: texto principal para o entregável E1, com identificação compacta e sem o anexo suplementar. **Confirme no PDF compilado que a versão final não excede seis páginas.**
+- `relatorio.tex`: versão completa, com capa e anexo detalhado para consulta e apresentação. O enunciado não concede explicitamente páginas extras para capa ou anexo; portanto, não use este PDF longo como E1 sem autorização do professor.
 
 ## Compilar
 
-```bash
+Em um ambiente com `latexmk` e os pacotes LaTeX comuns instalados:
+
+```powershell
 cd relatorio
+latexmk -g -pdf relatorio_entrega.tex
 latexmk -g -pdf relatorio.tex
 ```
 
-O `-g` força a recompilação: sem ele, o `latexmk` não percebe imagens novas em `figuras/`.
-Também funciona no Overleaf (envie a pasta inteira). Quando o pacote `babel` em
-português está instalado, como no Overleaf, a hifenização em português é ativada
-automaticamente. Sem ele, a hifenização fica desligada.
+O primeiro comando gera o PDF para conferir/submeter como E1; o segundo gera a versão com anexo. A compilação também pode ser feita no Overleaf, enviando a pasta `relatorio/` inteira. Confira referências cruzadas, figuras e paginação no PDF, pois a compilação integrada do Codex nesta máquina retornou `Unable to find standard directories for platform` e não exportou um PDF para revisão visual.
 
-## O que ainda falta
+O código e os resultados reproduzíveis estão em [github.com/VLROCK/MC919-T1](https://github.com/VLROCK/MC919-T1). A auditoria item a item do enunciado está em `AUDITORIA_T1.md`.
 
-| O quê | Onde | Como aparece no PDF |
-|---|---|---|
-| Dispositivo e resolução original das fotos | busque `\preencher{` (Seção 2.1) | texto vermelho entre colchetes |
-| Alinhamento progressivo (Figura 4) | `figuras/progressivo-1`, `-2`, `-3` | retângulos tracejados |
-| Logotipo na capa (opcional) | `figuras/logo-unicamp` | sem logotipo enquanto não existir |
+## Evidências incluídas
 
-As figuras aceitam `.png`, `.jpg` ou `.pdf` e entram no tamanho do espaço reservado,
-então a paginação não muda. Para gerar o alinhamento progressivo com a mesma
-configuração da base dos experimentos (mesmos índices e mesma ordem):
+As figuras `figuras/progressivo-1.jpg`, `progressivo-2.jpg` e `progressivo-3.jpg` são os quadros 002, 006 e 012 da execução `outputs/relatorio_progressivo_20261005/`. Ela usou os mesmos parâmetros da base do lote, com diagnósticos completos, e reproduziu a mesma ordem e a mesma intrusa rejeitada. Os arquivos `figuras/elemento-movel-0.jpg` e `elemento-movel-3.jpg` são as vistas de entrada 0 e 3; `figuras/deghost.png` mostra a mesma região alinhada sem e com remoção de fantasmas.
 
-```bash
-python -m panorama build data/minha_cena --output outputs/progressivo \
-  --projection cylindrical --alignment bundle --exposure gain \
-  --max-side 600 --nfeatures 2500 --ba-points 100 --ba-iterations 100 \
-  --max-megapixels 8 --compare-detectors --diagnostics full
+O anexo mostra o panorama do quintal e o `boat5`, comparação entre ajuste global e par a par, cilindro e esfera, feathering e multibanda, sensibilidade de resolução e parâmetros, remoção de fantasmas, controle sintético e referência `cv2.Stitcher`. Os gráficos e CSVs originais estão em `experimentos/20261005/`.
+
+Para refazer os quadros progressivos da cena própria, na raiz do repositório:
+
+```powershell
+.\.venv\Scripts\python.exe -m panorama build data/minha_cena `
+  --output outputs/relatorio_progressivo_20261005 `
+  --projection cylindrical --alignment bundle --exposure gain `
+  --max-side 600 --nfeatures 2500 --ba-points 100 --ba-iterations 100 `
+  --max-megapixels 8 --diagnostics full --seed 42
 ```
 
-Depois copie `progressive/002.jpg`, `006.jpg` e `012.jpg` para
-`figuras/progressivo-1`, `-2` e `-3`.
-
-## Origem das figuras e dos números
-
-Tudo vem do lote `experimentos/20261005/` (base: cilindro, ajuste global, ganho, 600 px).
-
-| Figura/tabela | Fonte |
-|---|---|
-| Figura 2 (keypoints e matches) | `evidencias/quintal/keypoints-*.jpg`, `matches-*.jpg` (vista 5 e par 5–6) |
-| Figura 3a (matriz) | `evidencias/quintal/conectividade.png` |
-| Figura 5 (panorama, deghost, Stitcher) | `evidencias/quintal/panorama.png`, `deghost.png`, `stitcher.png` |
-| Anexo A | `evidencias/quintal/entradas.jpg` |
-| Tabela 1 | `tabelas/quintal_detectores.*` e P95/tempo de `tabelas/quintal_variantes.*` |
-| Tabela 2 | `tabelas/quintal_pares_arvore.*` |
-| Tabela 3 | `tabelas/quintal_variantes.*` e `tabelas/boat5_variantes.*` |
-| Ordem, intrusa, foco, deghost e exposição | `RESULTADOS.md` e `resultados.json` |
-| Controle de deghosting | `tabelas/controle_movimento.*` |
+Os arquivos da cena disponíveis têm 1600×1200 pixels nas 12 vistas e 1599×899 na intrusa. O dispositivo informado pelo grupo é um Motorola Edge 50 Neo. As dimensões nativas do sensor não são inferíveis dos JPEGs recebidos por WhatsApp.

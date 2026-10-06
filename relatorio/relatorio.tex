@@ -1,4 +1,9 @@
-\documentclass[11pt,a4paper]{article}
+% relatorio.tex: versao completa com anexo. relatorio_entrega.tex: E1 sem anexo.
+\ifdefined\versaoentrega
+  \documentclass[10pt,a4paper]{article}
+\else
+  \documentclass[11pt,a4paper]{article}
+\fi
 
 % ---------------------------------------------------------------------------
 % Pacotes
@@ -55,11 +60,8 @@
 \renewcommand{\arraystretch}{1.15}
 
 % ---------------------------------------------------------------------------
-% Campos a preencher
+% Figuras
 % ---------------------------------------------------------------------------
-% Texto que ainda depende do grupo (busque por "\preencher").
-\newcommand{\preencher}[1]{\textcolor{pendente}{[\textit{Preencher: #1}]}}
-
 % \imagem{nome}{largura}{altura}{conteúdo esperado}
 % Usa figuras/<nome>.png, .jpg ou .pdf se existir; caso contrário, desenha um
 % espaço reservado do mesmo tamanho, para que a paginação não mude.
@@ -80,8 +82,17 @@
 \begin{document}
 
 % ---------------------------------------------------------------------------
-% Capa (não conta no limite de páginas)
+% A versao completa conserva a capa; E1 usa identificacao compacta.
 % ---------------------------------------------------------------------------
+\ifdefined\versaoentrega
+\begin{center}
+{\Large\bfseries Panoramas automáticos a partir de imagens fora de ordem}\\[3pt]
+MC919 Visão Computacional -- Trabalho 1 -- 2º semestre de 2026\\
+Bruno M. Saback (281746), Victor L. Roquetto (250955), Lucas S. Guimarães (195948),
+Lucas V. Lima (247025)
+\end{center}
+\vspace{-5pt}
+\else
 \begin{titlepage}
 \centering
 \vspace*{1.5cm}
@@ -111,6 +122,7 @@ Lucas Valadares Lima - 247025\par
 2º semestre de 2026 -- Outubro de 2026\par
 \end{titlepage}
 \setcounter{page}{1}
+\fi
 
 \begin{center}\textbf{\large Resumo}\end{center}
 \vspace{-6pt}
@@ -179,8 +191,10 @@ arquivos servem apenas como rótulos. As imagens são reduzidas a um maior lado 
 % ---------------------------------------------------------------------------
 \subsection{Coleta}
 As imagens foram capturadas em um quintal residencial, ambiente externo, em 3 de outubro de 2026, com
-iluminação natural e céu parcialmente nublado. \textbf{Dispositivo:} \preencher{câmera ou celular
-utilizado e resolução original das fotos.} O conjunto (Anexo~A) tem 13 imagens: 12
+iluminação natural e céu parcialmente nublado. O dispositivo utilizado foi um \textbf{Motorola Edge 50 Neo}.
+Os 12 arquivos da cena recebidos por WhatsApp têm \textbf{1600$\times$1200 pixels}; a intrusa tem
+1599$\times$899 pixels. Essas são as dimensões dos arquivos usados, não uma medida da resolução nativa do
+sensor, que não pode ser recuperada dos JPEGs sem EXIF. O conjunto (grade no material suplementar) tem 13 imagens: 12
 vistas parcialmente sobrepostas, que varrem o quintal da fachada da casa, à esquerda, até a casa vizinha,
 à direita, e uma imagem intrusa de um ambiente interno (vista 12). O elemento móvel é a folhagem da árvore
 em primeiro plano, presente sobretudo nas vistas 0 a 3; as nuvens também se deslocam entre as capturas. A
@@ -193,7 +207,9 @@ renomeadas e sem intrusa. A configuração base (SIFT com até 2500 pontos, 600~
 3~px, projeção cilíndrica com ajuste global, compensação de exposição, feathering e deghosting com limiar
 30) foi variada um parâmetro por vez, em 25 variantes por conjunto, incluindo as sementes 7 e 101 além da
 42. Com uma cópia do quintal com nomes aleatórios e o boat5 com ganhos de exposição artificiais, o pacote
-\texttt{experiments} executou 53 execuções sequenciais, com uma thread. Sem homografias de referência, a geometria é avaliada pela
+\texttt{experiments} executou 53 execuções sequenciais, com uma thread. As variantes de resolução usam
+400 ou 900~px para o maior lado e limiares RANSAC proporcionais (2 ou 4,5~px), mantendo a razão de 3~px
+por 600~px da base. Sem homografias de referência, a geometria é avaliada pela
 \emph{consistência em um suporte comum}: correspondências SIFT fixas e mais estritas (ratio 0,65, RANSAC
 de 1,5~px e até 200 por par) são reprojetadas pela geometria final de cada variante, e reportam-se a
 mediana e o percentil 95 (P95) do erro simétrico, em pixels a 600~px. A medida usa os mesmos pontos em
@@ -509,7 +525,8 @@ $\theta = \operatorname{atan2}(x,z)$ e $v = y/\sqrt{x^2+z^2}$ no cilindro, ou
 $\phi = \operatorname{atan2}(y,\sqrt{x^2+z^2})$ na esfera, com mapeamento inverso via \texttt{cv2.remap}.
 No modo 360°, o canvas cobre exatamente $2\pi$ de longitude, tratada de forma periódica no blending.
 Cilindro e esfera usam as mesmas rotações e tiveram o mesmo erro geométrico; diferem na deformação
-vertical do canvas.
+vertical do canvas. As fotos reais cobrem apenas um arco; o fechamento de 360° foi verificado em um
+conjunto sintético de 12 vistas com uma intrusa, sem apresentá-lo como resultado fotográfico real.
 
 \subsection{Compensação de exposição (X3)}
 Ganhos escalares $g_i$ são estimados pela luminância suavizada nos inliers, sem pixels escuros ou
@@ -525,6 +542,15 @@ No quintal (Tabela~\ref{tab:variantes}), ratio e RANSAC mais estritos reduziram 
 permissivos aumentaram a cauda do erro, e 900~px mais que dobraram o tempo sem reduzir o erro; no boat5, as
 variantes ficaram entre 0,39 e 0,45~px. O multibanda não altera a geometria e aumentou o tempo em cerca de
 26\%, e as três sementes produziram métricas geométricas idênticas (12,40~$\pm$~0,02~s).
+
+\textbf{Resolução.} No quintal, reduzir o maior lado de 600 para 400~px baixou o tempo do núcleo de 12,4
+para 5,3~s, com aumento moderado da mediana de 3,50 para 3,71~px e do P95 de 11,61 para 13,89~px.
+Elevá-lo a 900~px custou 26,8~s e piorou a mediana para 4,47~px e o P95 para 28,78~px. No boat5, 400,
+600 e 900~px deram medianas de 0,40, 0,40 e 0,43~px, com tempos de 1,24, 2,38 e 5,04~s; o P95 do
+boat5 caiu de 2,85 para 2,32~px a 900~px. Todos os erros foram reavaliados no mesmo suporte a 600~px,
+com as mesmas cinco ou doze imagens aceitas. Assim, 600~px é um compromisso operacional para o quintal,
+não uma resolução ótima universal; a maior escala pode aumentar o custo e também a influência de
+paralaxe/texturas repetidas. O material suplementar mostra as curvas de sensibilidade.
 
 O \texttt{cv2.Stitcher}, com as mesmas imagens redimensionadas, concluiu nas três sementes, tanto com as
 imagens aceitas quanto com as 13 entradas, incluindo a intrusa. Seu panorama
@@ -564,6 +590,9 @@ deghosting eliminou as cópias translúcidas da árvore, mas o controle sintéti
 transparência não garante recuperar o fundo. Testes automatizados com cenas sintéticas e gabarito
 verificam ainda a rejeição da intrusa, a independência entre nomes e ordem e o fechamento em 360°.
 
+Código, parâmetros, dados e resultados reproduzíveis:
+\href{https://github.com/VLROCK/MC919-T1}{github.com/VLROCK/MC919-T1}.
+
 As principais limitações decorrem das hipóteses do modelo: (i) a homografia pressupõe cena plana ou
 rotação pura, e a paralaxe perto da câmera explica os degraus na metade direita do panorama; (ii) a
 ordenação supõe uma varredura em faixa única, e a rejeição da intrusa supõe que a cena seja a maior
@@ -593,21 +622,195 @@ Springer, 2022.
 \end{thebibliography}
 
 % ---------------------------------------------------------------------------
-% Anexo (não conta no limite de páginas)
+% Anexo suplementar: incluído apenas na versão completa.
 % ---------------------------------------------------------------------------
+\ifdefined\versaoentrega
+\else
 \clearpage
 \setcounter{page}{1}
 \renewcommand{\thepage}{A\arabic{page}}
-\section*{Anexo A -- Imagens Coletadas}
+\section*{Anexo suplementar -- Evidências e comparações}
+Este anexo documenta as imagens e as comparações com mais detalhe. O PDF curto gerado por
+\texttt{relatorio\_entrega.tex} é a versão destinada ao limite de seis páginas do E1; o anexo é material
+suplementar e não substitui as evidências resumidas naquele texto. Todos os resultados reais abaixo vêm
+do lote \texttt{relatorio/experimentos/20261005}; a configuração base é SIFT, 600~px, cilindro, ajuste
+global, ganho, feathering e deghosting com limiar 30. As figuras de panorama têm canvas próprio e não
+devem ser usadas para medir deslocamentos diretamente entre variantes.
+
+\subsection*{A. Imagens de entrada e elemento móvel}
 As 13 imagens de entrada do quintal, na ordem de leitura (alfabética pelo nome do arquivo), que não
 corresponde à ordem de captura. Os índices são os mesmos usados nas figuras e tabelas do relatório; a
-vista 12 é a imagem intrusa, de um ambiente interno.
+vista 12 é a imagem intrusa, de um ambiente interno. O grupo fotografou 12 vistas parcialmente
+sobrepostas; o benchmark boat5, com cinco imagens públicas, é apenas um controle complementar.
 
 \begin{figure}[!htb]
 \centering
-\imagem{anexo-fotos}{\linewidth}{0.8\textheight}{Grade com as 13 imagens de entrada e seus índices}
+\imagem{anexo-fotos}{\linewidth}{0.57\textheight}{Grade com as 13 imagens de entrada e seus índices}
 \caption{Imagens de entrada do quintal; a vista 12 é a intrusa.}
 \label{fig:entradas}
 \end{figure}
+
+\begin{figure}[!htb]
+\centering
+\begin{subfigure}[t]{0.48\linewidth}\centering
+\imagem{elemento-movel-0}{\linewidth}{4.2cm}{Foto de entrada 0}
+\caption{Vista 0}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.48\linewidth}\centering
+\imagem{elemento-movel-3}{\linewidth}{4.2cm}{Foto de entrada 3}
+\caption{Vista 3}
+\end{subfigure}
+\caption{Duas capturas da cena com a árvore em primeiro plano. O movimento da folhagem entre capturas,
+somado à diferença de ponto de vista, torna a mistura direta das fontes inadequada. O recorte alinhado da
+Figura~\ref{fig:anexo-deghost} isola visualmente o efeito na composição.}
+\label{fig:movimento-fontes}
+\end{figure}
+
+\clearpage
+\subsection*{B. Resultados finais em dois conjuntos}
+O quintal (Figura~\ref{fig:anexo-finais}a) percorre a casa, o muro, a árvore e a casa vizinha. O algoritmo
+aceitou 12 fotos e rejeitou a intrusa. A imagem final tem partes bem alinhadas, mas a borda do muro à
+direita apresenta degraus de paralaxe; recortes no céu são consequência da seleção de fonte do
+deghosting. O boat5 (Figura~\ref{fig:anexo-finais}b) é uma cena pública de cinco vistas, sem intrusa,
+com menor variação de profundidade na região principal. Sua mediana de consistência foi 0,40~px, contra
+3,50~px no quintal; isso não equivale a medir erro em relação a um panorama verdadeiro.
+
+\begin{figure}[!htb]
+\centering
+\begin{subfigure}[t]{\linewidth}\centering
+\imagem{panorama}{\linewidth}{4.8cm}{Panorama do quintal}
+\caption{Quintal: panorama da base, 12 fotos aceitas}
+\end{subfigure}\\[4pt]
+\begin{subfigure}[t]{\linewidth}\centering
+\includegraphics[width=\linewidth,height=4.8cm,keepaspectratio]{experimentos/20261005/evidencias/boat5/panorama.png}
+\caption{Benchmark boat5: panorama da base, cinco fotos aceitas}
+\end{subfigure}
+\caption{Saídas finais do pipeline próprio, com a mesma família de parâmetros. O boat5 não atende a
+Etapa 1 do T1, que exige fotos coletadas pelo grupo e ao menos seis imagens.}
+\label{fig:anexo-finais}
+\end{figure}
+
+\clearpage
+\subsection*{C. Ajuste global, projeção e blending}
+As Figuras~\ref{fig:anexo-quintal-variantes} e~\ref{fig:anexo-boat-variantes} preservam os panoramas
+originais de cada variante, sem forçar um canvas comum. Em ambos os conjuntos, o alinhamento par a par
+acumula erro: no quintal, a mediana/P95 de consistência sobe de 3,50/11,61 para 43,86/138,18~px; no
+boat5, de 0,40/2,85 para 42,67/77,22~px. Os contornos duplicados nas fachadas e na linha do horizonte
+são visíveis. A projeção esférica conserva a geometria estimada, mas comprime a dimensão vertical de
+forma diferente; a comparação com o cilindro é visual, não um ganho de mediana. O blending multibanda
+suaviza transições de baixa frequência, porém não corrige desalinhamento geométrico nem remove objetos
+móveis por si só. A projeção plana falhou nos dois conjuntos, logo não aparece como panorama.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\linewidth,height=0.68\textheight,keepaspectratio]{experimentos/20261005/figuras/quintal_panoramas.png}
+\caption{Quintal: base cilíndrica com ajuste global, encadeamento par a par, projeção esférica e blending
+multibanda de cinco níveis, nessa ordem. A terceira imagem muda a projeção; a quarta muda só o blending.}
+\label{fig:anexo-quintal-variantes}
+\end{figure}
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\linewidth,height=0.68\textheight,keepaspectratio]{experimentos/20261005/figuras/boat5_panoramas.png}
+\caption{Boat5: as mesmas quatro variantes. O caso par a par desloca a linha do horizonte e duplica
+construções; o ajuste global mantém a continuidade visual.}
+\label{fig:anexo-boat-variantes}
+\end{figure}
+
+\clearpage
+\subsection*{D. Movimento e limite da remoção de fantasmas}
+Na mesma região e geometria do quintal, a média ponderada de fontes cria várias cópias transparentes da
+árvore; com limiar 30, a escolha de uma única fonte por componente torna a copa definida
+(Figura~\ref{fig:anexo-deghost}). O limiar 15 produz efeito parecido, mas altera área maior; o limiar 60
+deixa bordas retangulares no céu e na parede ao lado da árvore. A fração de pixels alterados, 82\%, 69\%
+e 45\% respectivamente, não mede apenas movimento: paralaxe, nuvens e iluminação também entram na máscara.
+
+\begin{figure}[!htb]
+\centering
+\imagem{deghost}{\linewidth}{5.0cm}{Recorte sem/com deghost}
+\caption{Mesmo recorte ampliado 2$\times$ no quintal, sem deghosting (esquerda) e com o limiar base de
+30 (direita). A diferença visual principal é a redução das cópias translúcidas da folhagem.}
+\label{fig:anexo-deghost}
+\end{figure}
+
+Um controle de composição sintético separa o efeito de transparência do de recuperar o fundo
+(Figura~\ref{fig:anexo-controle}). Com fundo conhecido, a mistura sem deghosting tem erro absoluto médio
+de 34,9 no caso favorável de alto contraste; ao escolher a fonte sem o objeto, o erro cai a 0. No caso
+adverso, a fonte escolhida contém o objeto e o erro aumenta de 58,3 para 93,2, embora a transparência
+desapareça. Em baixo contraste, o limiar 30 não detecta o objeto; o limiar 15 detecta. Esses retângulos
+sintéticos não são evidência de detecção semântica em fotografias reais.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\linewidth,height=0.54\textheight,keepaspectratio]{experimentos/20261005/figuras/controle_movimento_visual.png}
+\caption{Controle sintético: colunas sem deghosting, limiar 15 e limiar 30; linhas com posição favorável,
+posição adversa e baixo contraste. No caso adverso, a saída parece definida, mas mantém o objeto.}
+\label{fig:anexo-controle}
+\end{figure}
+
+\clearpage
+\subsection*{E. Resolução e sensibilidade dos parâmetros}
+\begin{center}\small
+\begin{tabular}{lrrrrrr}
+\hline
+& \multicolumn{3}{c}{Quintal} & \multicolumn{3}{c}{Boat5} \\
+Maior lado & Med. & P95 & Tempo (s) & Med. & P95 & Tempo (s) \\ \hline
+400~px & 3,71 & 13,89 & 5,30 & 0,40 & 2,63 & 1,24 \\
+600~px & 3,50 & 11,61 & 12,37 & 0,40 & 2,85 & 2,38 \\
+900~px & 4,47 & 28,78 & 26,76 & 0,43 & 2,32 & 5,04 \\ \hline
+\end{tabular}
+\end{center}
+\noindent Erros são medidos em pixels no suporte fixo de avaliação a 600~px; todos os ensaios de
+resolução mantiveram 12/5 imagens aceitas e suporte avaliado de 100\%. Os limiares RANSAC no
+processamento foram 2/3/4,5~px para maior lado 400/600/900~px. A resolução mais alta custa cerca de
+2,2$\times$ o tempo da base nos dois conjuntos. No quintal, o erro piora em 900~px; no boat5, a
+mediana aumenta levemente e o P95 melhora. Portanto, o ganho de amostragem depende da cena e da métrica.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=\linewidth,height=0.51\textheight,keepaspectratio]{experimentos/20261005/figuras/quintal_sensibilidade.png}
+\caption{Quintal: sensibilidade da mediana a ratio de Lowe, RANSAC, limite SIFT e resolução. Cada ponto
+muda um parâmetro da base, sem indicar incerteza estatística entre cenas. A tabela acima acrescenta P95 e
+custo computacional, indispensáveis para interpretar a escolha da escala.}
+\label{fig:anexo-sensibilidade}
+\end{figure}
+
+\noindent Com limite SIFT 1000, a mediana/P95 do quintal passa a 3,88/19,53~px e o núcleo cai a 9,7~s;
+elevar de 2500 a 5000 não melhorou as métricas. Ratio 0,60 reduziu P95 a 7,92~px, enquanto ratio 0,85
+o elevou a 28,59~px e aumentou o tempo a 22,6~s. Com RANSAC 1,5~px, a mediana foi 2,68~px; com 6~px,
+3,86~px. O foco inicial 0,6 produziu a menor mediana observada no quintal (2,23~px), mas não estabelece
+um ótimo fora destes dados. Todas as variantes e falhas estão nas tabelas CSV do lote.
+
+\subsection*{F. Exposição, referência pronta e reprodução}
+No boat5 com ganhos artificiais entre 0,65 e 1,2, a compensação diminuiu a diferença fotométrica média
+nas correspondências fixas de 41,5 para 4,2 níveis de cinza; a máscara de inconsistência caiu de 56\%
+para 7\% da área válida. A geometria não mudou (mediana 0,40~px com ou sem ganhos), pois a compensação
+é aplicada após o alinhamento. No quintal real, a diferença caiu de 11,5 para 9,4 níveis. O
+\texttt{cv2.Stitcher} concluiu com todas as 13 entradas do quintal, mas o seu panorama omitiu parte da
+fachada esquerda, enquanto a saída própria incluiu todas as 12 vistas válidas. Seu tempo médio de 6,3~s
+não é diretamente comparável aos 12,4~s do núcleo próprio, que compõe com e sem deghosting e registra
+diagnósticos.
+
+\begin{figure}[!htb]
+\centering
+\begin{subfigure}[t]{0.49\linewidth}\centering
+\imagem{stitcher}{\linewidth}{4.1cm}{Stitcher do quintal}
+\caption{Stitcher no quintal}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\linewidth}\centering
+\includegraphics[width=\linewidth,height=4.1cm,keepaspectratio]{experimentos/20261005/evidencias/boat5/stitcher.png}
+\caption{Stitcher no boat5}
+\end{subfigure}
+\caption{Referência pronta OpenCV nas mesmas imagens aceitas, para comparação visual. Os canvases e
+decisões internas de composição não são idênticos aos do pipeline próprio.}
+\end{figure}
+
+\noindent Dados tabulares, gráficos em PDF/PNG/SVG, logs, métricas por execução e comandos de reprodução
+estão em \texttt{relatorio/experimentos/20261005/} e no repositório
+\href{https://github.com/VLROCK/MC919-T1}{github.com/VLROCK/MC919-T1}. As 53 execuções incluem quatro
+falhas planas registradas; os resultados completos não devem ser resumidos apenas pelas variantes
+bem-sucedidas. O teste 360° usa um conjunto \emph{sintético} com fechamento de ciclo; as fotografias do
+quintal e do boat5 cobrem apenas um arco, de modo que não se afirma um panorama real de 360°.
+\fi
 
 \end{document}
