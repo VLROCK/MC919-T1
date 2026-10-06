@@ -39,6 +39,8 @@ def parser():
         q.add_argument("--roi", nargs=4, type=int, metavar=("X", "Y", "W", "H"))
         q.add_argument("--draw-matches", type=int, default=120)
         q.add_argument("--reference", action="store_true", help="Compara com cv2.Stitcher")
+        q.add_argument("--diagnostics", choices=["full", "compact"], default="full",
+                       help="compact omite keypoints/matches/progressivo; mantém métricas e panoramas")
         q.add_argument("--seed", type=int, default=42)
     q = sub.add_parser("demo", help="Gera fotos sintéticas, não substitui a coleta")
     q.add_argument("--output", type=Path, default=Path("data/demo"))

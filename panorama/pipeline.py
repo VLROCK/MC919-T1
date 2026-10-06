@@ -17,13 +17,20 @@ from .warp import make_canvas, warp_frame
 
 def run(args):
     start = perf_counter()
+    timings = {}
+    full = getattr(args, "diagnostics", "full") == "full"
     output = new_output(args.output)
     cv2.setRNGSeed(args.seed)
     cv2.setNumThreads(1)
     frames = read_frames(args.input, args.max_side)
+    timings["read"] = perf_counter()-start
     print(f"{len(frames)} imagens; detector={args.detector}; saída={output}", flush=True)
-    selected = features.extract(frames, args.detector, args.nfeatures, output)
-    edges, records, matrix = features.match_all(frames, selected, args, output)
+    tick = perf_counter()
+    selected = features.extract(frames, args.detector, args.nfeatures, output if full else None)
+    timings["extract"] = perf_counter()-tick
+    tick = perf_counter()
+    edges, records, matrix = features.match_all(frames, selected, args, output if full else None)
+    timings["match"] = perf_counter()-tick
     detector_stats = {}
     for detector in dict.fromkeys([args.detector] + args.compare_detectors):
         if detector == args.detector:
@@ -32,7 +39,7 @@ def run(args):
             from copy import copy
             other = copy(args)
             other.detector = detector
-            current = features.extract(frames, detector, args.nfeatures, output)
+            current = features.extract(frames, detector, args.nfeatures, output if full else None)
             _, pairs, _ = features.match_all(frames, current, other)
         detector_stats[detector] = dict(keypoints=[len(f.keypoints) for f in current],
                                         extraction_seconds=sum(f.seconds for f in current),
@@ -40,6 +47,7 @@ def run(args):
     diagnostics.connectivity(matrix, [f.name for f in frames], output)
     save_json(output / "matching.json", dict(images=[f.name for f in frames], pairs=records,
                                              detectors=detector_stats, config=vars(args)))
+    tick = perf_counter()
     ids, rejected = graph.component(len(frames), edges)
     edges = [e for e in edges if e.i in ids and e.j in ids]
     transforms, root, tree = graph.initialize(ids, edges, frames, args.projection, args.focal_factor)
@@ -66,6 +74,8 @@ def run(args):
         inconsistent_edges=inconsistent,
         errors=alignment_errors(transforms, edges, frames, args.projection, focal)))
     canvas = make_canvas(frames, transforms, order, args, focal)
+    timings["geometry"] = perf_counter()-tick
+    tick = perf_counter()
     shape = canvas.height, canvas.width
     normal, clean = np.zeros((*shape, 3), np.float32), np.zeros((*shape, 3), np.float32)
     valid, changes = np.zeros(shape, bool), np.zeros(shape, np.uint8)
@@ -81,10 +91,12 @@ def run(args):
             overlap_stats.append(dict(image=i, pixels=int(overlap.sum()),
                                        mean_absolute_color_difference=float(diff[overlap].mean())))
         valid |= mask
-        preview = clean
-        if max(shape) > 1600:
-            preview = cv2.resize(clean, None, fx=1600/max(shape), fy=1600/max(shape))
-        save_image(output / "progressive" / f"{step+1:03}.jpg", preview)
+        if full:
+            preview = clean
+            if max(shape) > 1600:
+                preview = cv2.resize(clean, None, fx=1600/max(shape), fy=1600/max(shape))
+            save_image(output / "progressive" / f"{step+1:03}.jpg", preview)
+    timings["compose"] = perf_counter()-tick
     coverage = float(np.mean(valid.any(axis=0)))
     if args.full_360 and coverage < 1.:
         save_image(output / "incomplete_coverage.png", valid.astype(np.uint8)*255)
@@ -123,6 +135,8 @@ def run(args):
         both = valid[:, 0] & valid[:, -1]
         metrics["wrap_boundary_mae"] = float(np.abs(clean[both, 0]-clean[both, -1]).mean()) if both.any() else None
     metrics["pipeline_seconds"] = perf_counter()-start
+    metrics["stage_seconds"] = timings
+    metrics["core_seconds"] = sum(timings.values())
     if args.reference:
         metrics["reference"] = stitch_reference(frames, ids, output / "reference")
         metrics["reference_all_inputs"] = stitch_reference(frames, list(range(len(frames))), output / "reference_all")

@@ -1,0 +1,16 @@
+﻿case,method,background_mae,background_rmse,mixed_fraction,changed_fraction
+favoravel_alto_contraste,sem_deghost,34.92026138305664,39.25389099121094,1.0,0.0
+favoravel_alto_contraste,limiar15,0.0,0.0,0.0,1.0
+favoravel_alto_contraste,limiar30,0.0,0.0,0.0,1.0
+favoravel_alto_contraste,limiar60,0.0,0.0,0.0,1.0
+favoravel_alto_contraste,multibanda30,0.0,0.0,0.0,1.0
+adverso_alto_contraste,sem_deghost,58.28813171386719,65.56739807128906,1.0,0.0
+adverso_alto_contraste,limiar15,93.20838928222656,104.47944641113281,0.0,1.0
+adverso_alto_contraste,limiar30,93.20838928222656,104.47944641113281,0.0,1.0
+adverso_alto_contraste,limiar60,93.20838928222656,104.47944641113281,0.0,1.0
+adverso_alto_contraste,multibanda30,93.20838928222656,104.47944641113281,0.0,1.0
+favoravel_baixo_contraste,sem_deghost,9.342010498046875,9.392720222473145,1.0,0.0
+favoravel_baixo_contraste,limiar15,0.0,0.0,0.0,1.0
+favoravel_baixo_contraste,limiar30,9.342010498046875,9.392720222473145,1.0,0.0
+favoravel_baixo_contraste,limiar60,9.342010498046875,9.392720222473145,1.0,0.0
+favoravel_baixo_contraste,multibanda30,9.365903854370117,9.402615547180176,1.0,0.0

@@ -1,0 +1,5 @@
+| Detector | Keypoints médios | Extração s | Arestas RANSAC | Erro mediano px600 |
+| --- | --- | --- | --- | --- |
+| sift | 625.200 | 0.313 | 5 | 0.399 |
+| orb | 2102.400 | 1.433 | 5 | 0.391 |
+| akaze | 281.200 | 1.543 | 5 | 0.474 |

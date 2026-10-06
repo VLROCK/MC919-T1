@@ -217,6 +217,15 @@ Essas cenas não substituem a coleta exigida no T1.
 
 ## Arquitetura e entrega
 
+Os lotes e os gráficos para análise estão em
+[relatorio/experimentos/README.md](relatorio/experimentos/README.md).
+O conjunto público de cinco imagens fica em `data/benchmark_boat5/`; origem e hashes
+estão no manifesto. Para reproduzir os experimentos, veja [experiments/README.md](experiments/README.md).
+
+```powershell
+Start-Process relatorio/experimentos/20261005/index.html
+```
+
 Veja [documentação dos algoritmos](docs/algoritmos.md),
 [mapa de requisitos do T1](docs/requisitos.md),
 [validação executada](docs/validacao.md),

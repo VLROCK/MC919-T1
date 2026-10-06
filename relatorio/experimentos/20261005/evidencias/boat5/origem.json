@@ -1,0 +1,24 @@
+{
+  "run": "outputs\\experimentos_20261005\\runs\\boat5\\base",
+  "index_to_file": [
+    "vista_a.jpg",
+    "vista_b.jpg",
+    "vista_c.jpg",
+    "vista_d.jpg",
+    "vista_e.jpg"
+  ],
+  "order": [
+    3,
+    0,
+    4,
+    1,
+    2
+  ],
+  "rejected": [],
+  "keypoint_image": 0,
+  "match_pair": [
+    0,
+    3
+  ],
+  "note": "Matches redesenhados para o par isolado; números das tabelas vêm da execução completa original."
+}

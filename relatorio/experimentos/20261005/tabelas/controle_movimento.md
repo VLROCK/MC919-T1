@@ -1,0 +1,17 @@
+| case | method | background_mae | background_rmse | mixed_fraction | changed_fraction |
+| --- | --- | --- | --- | --- | --- |
+| favoravel_alto_contraste | sem_deghost | 34.920 | 39.254 | 1.000 | 0.000 |
+| favoravel_alto_contraste | limiar15 | 0.000 | 0.000 | 0.000 | 1.000 |
+| favoravel_alto_contraste | limiar30 | 0.000 | 0.000 | 0.000 | 1.000 |
+| favoravel_alto_contraste | limiar60 | 0.000 | 0.000 | 0.000 | 1.000 |
+| favoravel_alto_contraste | multibanda30 | 0.000 | 0.000 | 0.000 | 1.000 |
+| adverso_alto_contraste | sem_deghost | 58.288 | 65.567 | 1.000 | 0.000 |
+| adverso_alto_contraste | limiar15 | 93.208 | 104.479 | 0.000 | 1.000 |
+| adverso_alto_contraste | limiar30 | 93.208 | 104.479 | 0.000 | 1.000 |
+| adverso_alto_contraste | limiar60 | 93.208 | 104.479 | 0.000 | 1.000 |
+| adverso_alto_contraste | multibanda30 | 93.208 | 104.479 | 0.000 | 1.000 |
+| favoravel_baixo_contraste | sem_deghost | 9.342 | 9.393 | 1.000 | 0.000 |
+| favoravel_baixo_contraste | limiar15 | 0.000 | 0.000 | 0.000 | 1.000 |
+| favoravel_baixo_contraste | limiar30 | 9.342 | 9.393 | 1.000 | 0.000 |
+| favoravel_baixo_contraste | limiar60 | 9.342 | 9.393 | 1.000 | 0.000 |
+| favoravel_baixo_contraste | multibanda30 | 9.366 | 9.403 | 1.000 | 0.000 |
