@@ -1,0 +1,33 @@
+{
+  "dataset": "quintal",
+  "input": "data/minha_cena",
+  "variant": "projection_planar_pairwise",
+  "group": "projection",
+  "config": {
+    "projection": "planar",
+    "alignment": "pairwise",
+    "exposure": "gain",
+    "blend": "feather",
+    "detector": "sift",
+    "max_side": 600,
+    "nfeatures": 2500,
+    "ratio": 0.75,
+    "ransac": 3.0,
+    "ba_points": 100,
+    "ba_iterations": 100,
+    "focal_factor": 0.9,
+    "seed": 42,
+    "deghost": "inconsistency",
+    "ghost_threshold": 30,
+    "ghost_dilate": 5,
+    "bands": 5,
+    "diagnostics": "compact",
+    "max_megapixels": 8
+  },
+  "reference": false,
+  "status": "failed",
+  "returncode": 2,
+  "wall_seconds": 8.101074100006372,
+  "output": "outputs\\experimentos_20261005\\runs\\quintal\\projection_planar_pairwise",
+  "command": "C:\\Users\\Victor\\Documents\\mc919\\Trabalho1\\.venv\\Scripts\\python.exe -m panorama build data/minha_cena --output outputs\\experimentos_20261005\\runs\\quintal\\projection_planar_pairwise --projection planar --alignment pairwise --exposure gain --blend feather --detector sift --max-side 600 --nfeatures 2500 --ratio 0.75 --ransac 3.0 --ba-points 100 --ba-iterations 100 --focal-factor 0.9 --seed 42 --deghost inconsistency --ghost-threshold 30 --ghost-dilate 5 --bands 5 --diagnostics compact --max-megapixels 8 --compare-detectors"
+}

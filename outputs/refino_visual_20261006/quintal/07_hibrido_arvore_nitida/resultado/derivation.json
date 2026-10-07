@@ -1,0 +1,12 @@
+{
+  "type": "derived_comparison_not_independent_build",
+  "left_source": "outputs\\refino_visual_20261006\\quintal\\01_base\\resultado",
+  "right_source": "outputs\\refino_visual_20261006\\quintal\\03_multibanda_sem_deghost\\resultado",
+  "left_behavior": "deghosting original na árvore",
+  "right_behavior": "multibanda sem deghosting",
+  "transition_x_pixels": [
+    550,
+    850
+  ],
+  "note": "A região à direita pode conter desfoque/ghosting por paralaxe."
+}

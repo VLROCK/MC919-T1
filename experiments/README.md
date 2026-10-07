@@ -82,6 +82,3 @@ escrita de `alignment.json`. Tempos Stitcher têm escopo próprio; não são uma
 com custo rigorosamente idêntico. Três sementes da base fornecem desvio padrão
 descritivo, não significância estatística nem repetição de todas as configurações.
 
-O relatório original não é preenchido automaticamente: isso evita afirmar dados de
-coleta, conclusões visuais ou hipóteses que o grupo ainda precisa confirmar. O pacote
-tem números e figuras prontos, além das mudanças de metodologia necessárias.

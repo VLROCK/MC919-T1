@@ -1,0 +1,33 @@
+{
+  "dataset": "boat5",
+  "input": "data/benchmark_boat5",
+  "variant": "detector_orb",
+  "group": "detector",
+  "config": {
+    "projection": "cylindrical",
+    "alignment": "bundle",
+    "exposure": "gain",
+    "blend": "feather",
+    "detector": "orb",
+    "max_side": 600,
+    "nfeatures": 2500,
+    "ratio": 0.75,
+    "ransac": 3.0,
+    "ba_points": 100,
+    "ba_iterations": 100,
+    "focal_factor": 0.9,
+    "seed": 42,
+    "deghost": "inconsistency",
+    "ghost_threshold": 30,
+    "ghost_dilate": 5,
+    "bands": 5,
+    "diagnostics": "compact",
+    "max_megapixels": 8
+  },
+  "reference": false,
+  "status": "ok",
+  "returncode": 0,
+  "wall_seconds": 4.972877599997446,
+  "output": "outputs\\experimentos_20261005\\runs\\boat5\\detector_orb",
+  "command": "C:\\Users\\Victor\\Documents\\mc919\\Trabalho1\\.venv\\Scripts\\python.exe -m panorama build data/benchmark_boat5 --output outputs\\experimentos_20261005\\runs\\boat5\\detector_orb --projection cylindrical --alignment bundle --exposure gain --blend feather --detector orb --max-side 600 --nfeatures 2500 --ratio 0.75 --ransac 3.0 --ba-points 100 --ba-iterations 100 --focal-factor 0.9 --seed 42 --deghost inconsistency --ghost-threshold 30 --ghost-dilate 5 --bands 5 --diagnostics compact --max-megapixels 8 --compare-detectors"
+}

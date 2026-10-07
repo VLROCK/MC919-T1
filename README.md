@@ -111,6 +111,25 @@ Exemplos individuais:
 .\.venv\Scripts\python.exe -m panorama build data/minha_cena --output outputs/orb --detector orb --compare-detectors sift orb akaze --ratio 0.8
 ```
 
+Para comparar o refinamento visual do quintal e do benchmark boat5, preservando
+cada execução e gerando recortes sem bordas pretas:
+
+```powershell
+.\.venv\Scripts\python.exe -m experiments.refine_visual
+```
+
+Veja `outputs/refino_visual_20261006/README.md`, as grades `comparacao_*.png`
+e o `resumo.csv`. Para apenas recortar uma execução existente, sem alterar
+`panorama.png`:
+
+```powershell
+.\.venv\Scripts\python.exe -m panorama.crop outputs/sua_execucao
+```
+
+O recorte é o maior retângulo totalmente coberto pela cena. A versão
+`panorama_transparent.png` preserva o campo de visão completo com transparência
+fora das áreas válidas.
+
 ## Panorama de 360° (X2)
 
 Precisa de fotos que cubram a volta inteira, com sobreposição entre a primeira e a

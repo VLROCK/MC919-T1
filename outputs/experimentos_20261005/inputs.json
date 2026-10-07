@@ -1,0 +1,154 @@
+{
+  "quintal": [
+    {
+      "file": "WhatsApp Image 2026-10-03 at 14.13.23.jpeg",
+      "sha256": "b510555943d47b47e21af3634b872034aae67e2f1702f0bd986ec523d0999a5e"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-03 at 14.13.24 (1).jpeg",
+      "sha256": "cb87470b07e2189d7f0261dfe438343c68395d472c356b3c0d05bbd5016b9a1c"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-03 at 14.13.24 (2).jpeg",
+      "sha256": "f8f0f11075c35d7c9af28ba02db5886318dc6728c3874b686f6fffb920612fd0"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-03 at 14.13.24.jpeg",
+      "sha256": "b2019eac89085fc2a6def61866f2eda725c9567a7103e02db5e2b5d9a28f4917"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-03 at 14.13.25 (1).jpeg",
+      "sha256": "fe585c6e923c6759d9ca378176b92e3d1dcb3b70e0c59b220166266c9fecedbc"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-03 at 14.13.25 (2).jpeg",
+      "sha256": "adc91bbb90ea19382d290c1088c828bdb97d4fcdb70572042cdf4ba298388bf7"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-03 at 14.13.25 (3).jpeg",
+      "sha256": "f0f92aa2d4736dcfeed5bc9cce1c5f2d94d8857d0408dbdbc56cab5c753bc9f1"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-03 at 14.13.25.jpeg",
+      "sha256": "42278f6ca957f50afc569f9c5759062c4e051d333f1e13ad0130c640de56a40e"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-03 at 14.13.26 (1).jpeg",
+      "sha256": "5fc81bd66b622dec2d91e28068cc4928f6ed6db35f6197361a9eebf3cd21a216"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-03 at 14.13.26 (2).jpeg",
+      "sha256": "923668ec6fb207668ffb22f50e650e5fd69f4b6907f974703fa076949ce3e5cd"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-03 at 14.13.26 (3).jpeg",
+      "sha256": "e0640dc432becaba0aefa1c72431314f1b3ba44d3eab90de1474c7ee22fa2b38"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-03 at 14.13.26.jpeg",
+      "sha256": "8f07c442b7cefc6120bf0019c2136e03cf75b345239eb6aca1d251ac44e7b00c"
+    },
+    {
+      "file": "WhatsApp Image 2026-10-03 at 14.14.45.jpeg",
+      "sha256": "5648f01cf2b03fc799a797dfa3c013166f2c86a6e7a7e1cb5a3f3c5cabd99f42"
+    }
+  ],
+  "boat5": [
+    {
+      "file": "vista_a.jpg",
+      "sha256": "3bb4e222a5879d2555c3f1109e6b77284b418f378db02e6e86cc414f46fb33ad"
+    },
+    {
+      "file": "vista_b.jpg",
+      "sha256": "be8392f53a624426de2ce918dd803e55236e79cf7bb573338d7b684ba950848f"
+    },
+    {
+      "file": "vista_c.jpg",
+      "sha256": "076fcf028c3078e9f7b612c380a6c75d6e08109e74835ac5147a5a1960e5fc68"
+    },
+    {
+      "file": "vista_d.jpg",
+      "sha256": "c084dab5e87d0c7a018fc6ab75e847621f0809b20a968c42bfb5d58b81303f2e"
+    },
+    {
+      "file": "vista_e.jpg",
+      "sha256": "dd3c5c15bff43782039aeeff19361251ab9d60b3fb6d1195df6b7dc357e33e65"
+    }
+  ],
+  "boat5_exposure": [
+    {
+      "file": "vista_a.png",
+      "sha256": "363a297e38aabdd13df8a418abd66e2984f98315e207e2ffbe48e50665456a86"
+    },
+    {
+      "file": "vista_b.png",
+      "sha256": "728f1ed9da4c552bd6d08234b59e3b8efb5d2bea9de4a945357da6f58f9c4de4"
+    },
+    {
+      "file": "vista_c.png",
+      "sha256": "1dc34b7c8b054d0135238ad7e14a3b66cf0093f2fd92f8711501b5481995d4e0"
+    },
+    {
+      "file": "vista_d.png",
+      "sha256": "562c2d6b3958b5023bc734a6d69b3aa1743c3aaaaa3a37e9d2767e05f78a7e4d"
+    },
+    {
+      "file": "vista_e.png",
+      "sha256": "b1ddec174afd1fab517a4d44163578234921c0308ed4ea3ffd7d4714e5971b98"
+    }
+  ],
+  "quintal_shuffled": [
+    {
+      "file": "foto_000.jpeg",
+      "sha256": "fe585c6e923c6759d9ca378176b92e3d1dcb3b70e0c59b220166266c9fecedbc"
+    },
+    {
+      "file": "foto_001.jpeg",
+      "sha256": "b2019eac89085fc2a6def61866f2eda725c9567a7103e02db5e2b5d9a28f4917"
+    },
+    {
+      "file": "foto_002.jpeg",
+      "sha256": "5fc81bd66b622dec2d91e28068cc4928f6ed6db35f6197361a9eebf3cd21a216"
+    },
+    {
+      "file": "foto_003.jpeg",
+      "sha256": "f0f92aa2d4736dcfeed5bc9cce1c5f2d94d8857d0408dbdbc56cab5c753bc9f1"
+    },
+    {
+      "file": "foto_004.jpeg",
+      "sha256": "923668ec6fb207668ffb22f50e650e5fd69f4b6907f974703fa076949ce3e5cd"
+    },
+    {
+      "file": "foto_005.jpeg",
+      "sha256": "42278f6ca957f50afc569f9c5759062c4e051d333f1e13ad0130c640de56a40e"
+    },
+    {
+      "file": "foto_006.jpeg",
+      "sha256": "f8f0f11075c35d7c9af28ba02db5886318dc6728c3874b686f6fffb920612fd0"
+    },
+    {
+      "file": "foto_007.jpeg",
+      "sha256": "e0640dc432becaba0aefa1c72431314f1b3ba44d3eab90de1474c7ee22fa2b38"
+    },
+    {
+      "file": "foto_008.jpeg",
+      "sha256": "adc91bbb90ea19382d290c1088c828bdb97d4fcdb70572042cdf4ba298388bf7"
+    },
+    {
+      "file": "foto_009.jpeg",
+      "sha256": "8f07c442b7cefc6120bf0019c2136e03cf75b345239eb6aca1d251ac44e7b00c"
+    },
+    {
+      "file": "foto_010.jpeg",
+      "sha256": "cb87470b07e2189d7f0261dfe438343c68395d472c356b3c0d05bbd5016b9a1c"
+    },
+    {
+      "file": "foto_011.jpeg",
+      "sha256": "5648f01cf2b03fc799a797dfa3c013166f2c86a6e7a7e1cb5a3f3c5cabd99f42"
+    },
+    {
+      "file": "foto_012.jpeg",
+      "sha256": "b510555943d47b47e21af3634b872034aae67e2f1702f0bd986ec523d0999a5e"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+5 imagens; detector=sift; saída=outputs\experimentos_20261005\runs\boat5_exposure\gain
+Ajustando todos os pares aceitos...
+Compondo 1/5: vista_d.png
+Compondo 2/5: vista_a.png
+Compondo 3/5: vista_e.png
+Compondo 4/5: vista_b.png
+Compondo 5/5: vista_c.png
+Ordem: ['vista_d.png', 'vista_a.png', 'vista_e.png', 'vista_b.png', 'vista_c.png']
+Rejeitadas: []
+AVISO: 1 atalhos rejeitados por inconsistência global; confira as texturas.
+AVISO: Menos de seis imagens aceitas: conjunto insuficiente para a etapa 1 do T1.
+AVISO: Nenhuma imagem rejeitada; a demonstração da intrusa ainda precisa ser conferida.

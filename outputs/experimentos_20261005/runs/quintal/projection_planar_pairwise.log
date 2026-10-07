@@ -1,0 +1,2 @@
+13 imagens; detector=sift; saída=outputs\experimentos_20261005\runs\quintal\projection_planar_pairwise
+Erro: A projeção plana de 'WhatsApp Image 2026-10-03 at 14.13.23.jpeg' cruza o infinito (não existe um canvas finito nesse referencial). Isso pode ocorrer em uma varredura ampla ou por alinhamento incorreto. Tente novamente acrescentando --projection cylindrical --alignment bundle --exposure gain, sem reutilizar a pasta --output da tentativa anterior.

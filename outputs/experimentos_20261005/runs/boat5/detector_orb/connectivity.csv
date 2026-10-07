@@ -1,0 +1,6 @@
+image,vista_a.jpg,vista_b.jpg,vista_c.jpg,vista_d.jpg,vista_e.jpg
+vista_a.jpg,0,4,2,457,535
+vista_b.jpg,4,0,341,4,241
+vista_c.jpg,2,341,0,4,7
+vista_d.jpg,457,4,4,0,156
+vista_e.jpg,535,241,7,156,0

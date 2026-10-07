@@ -1,0 +1,16 @@
+{
+  "method": "largest all-valid axis-aligned rectangle",
+  "source_size": [
+    1485,
+    405
+  ],
+  "crop_xywh": [
+    2,
+    19,
+    1474,
+    354
+  ],
+  "crop_area_fraction_of_canvas": 0.8676,
+  "valid_pixels_retained_fraction": 0.91429,
+  "note": "O recorte remove pixels; panorama.png continua intacto."
+}

@@ -1,0 +1,17 @@
+13 imagens; detector=sift; saída=outputs\experimentos_20261005\runs\quintal_shuffled\base
+Ajustando todos os pares aceitos...
+Compondo 1/12: foto_012.jpeg
+Compondo 2/12: foto_001.jpeg
+Compondo 3/12: foto_010.jpeg
+Compondo 4/12: foto_006.jpeg
+Compondo 5/12: foto_005.jpeg
+Compondo 6/12: foto_000.jpeg
+Compondo 7/12: foto_008.jpeg
+Compondo 8/12: foto_003.jpeg
+Compondo 9/12: foto_009.jpeg
+Compondo 10/12: foto_002.jpeg
+Compondo 11/12: foto_004.jpeg
+Compondo 12/12: foto_007.jpeg
+Ordem: ['foto_012.jpeg', 'foto_001.jpeg', 'foto_010.jpeg', 'foto_006.jpeg', 'foto_005.jpeg', 'foto_000.jpeg', 'foto_008.jpeg', 'foto_003.jpeg', 'foto_009.jpeg', 'foto_002.jpeg', 'foto_004.jpeg', 'foto_007.jpeg']
+Rejeitadas: ['foto_011.jpeg']
+AVISO: 24 atalhos rejeitados por inconsistência global; confira as texturas.
